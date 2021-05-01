@@ -1,0 +1,22 @@
+<?xml version="1.0" encoding="utf-8"?>
+<menu xmlns:android="http://schemas.android.com/apk/res/android">
+    <item
+        android:id="@+id/postsFragment"
+        android:enabled="true"
+        android:orderInCategory="1"
+        android:icon="@drawable/ic_baseline_menu_book_24"
+        android:title="@string/text_label_1"/>
+    <item
+        android:id="@+id/usersFragment"
+        android:enabled="true"
+        android:orderInCategory="2"
+        android:icon="@drawable/ic_baseline_person_24"
+        android:title="@string/text_label_2"/>
+    <item
+        android:id="@+id/settingsFragment"
+        android:enabled="true"
+        android:orderInCategory="3"
+        android:icon="@drawable/ic_baseline_settings_24"
+        android:title="@string/text_label_2"/>
+
+</menu>

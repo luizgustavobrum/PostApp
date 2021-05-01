@@ -1,0 +1,10 @@
+<resources>
+    <string name="app_name">Post In Our Hand</string>
+
+    <!--Bottom Navigation-->
+    <string name="text_label_1">Posts</string>
+    <string name="text_label_2">Users</string>
+    <string name="text_label_3">Settings</string>
+
+
+</resources>
