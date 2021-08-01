@@ -33,13 +33,24 @@ class PostsFragment : Fragment() {
 
     override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
         super.onViewCreated(view, savedInstanceState)
+        setSwiperefresh()
+        setObserver()
+    }
 
+    override fun onDestroyView() {
+        _binding = null
+        super.onDestroyView()
+    }
+
+    private fun setSwiperefresh() {
         binding.swiperefresh.setOnRefreshListener {
             viewModel.getPosts()
             binding.swiperefresh.isRefreshing = false
         }
+    }
 
-        viewModel.uiPostsState.asLiveData().observe(viewLifecycleOwner, Observer { states ->
+    private fun setObserver() {
+        viewModel.uiPostsState.asLiveData().observe(viewLifecycleOwner, { states ->
             when (states) {
                 is UiState.Initial -> Unit
                 is UiState.Loading -> {
@@ -55,15 +66,7 @@ class PostsFragment : Fragment() {
 
                 }
             }
-
         })
-
-
-    }
-
-    override fun onDestroyView() {
-        _binding = null
-        super.onDestroyView()
     }
 
     private fun createPostsRecyclerView(posts: List<Post>) {

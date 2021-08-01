@@ -36,13 +36,24 @@ class UsersFragment : Fragment() {
 
     override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
         super.onViewCreated(view, savedInstanceState)
+        setSwiperefresh()
+        setObserver()
+    }
 
+    override fun onDestroyView() {
+        _binding = null
+        super.onDestroyView()
+    }
+
+    private fun setSwiperefresh() {
         binding.swiperefresh.setOnRefreshListener {
             viewModel.getUsers()
             binding.swiperefresh.isRefreshing = false
         }
+    }
 
-        viewModel.uiUsersState.asLiveData().observe(viewLifecycleOwner, Observer { states ->
+    private fun setObserver() {
+        viewModel.uiUsersState.asLiveData().observe(viewLifecycleOwner, { states ->
             when (states) {
                 is UiState.Initial -> Unit
                 is UiState.Loading -> {
@@ -59,11 +70,6 @@ class UsersFragment : Fragment() {
                 }
             }
         })
-    }
-
-    override fun onDestroyView() {
-        _binding = null
-        super.onDestroyView()
     }
 
     private fun createUsersRecyclerView(users: List<User>) {
