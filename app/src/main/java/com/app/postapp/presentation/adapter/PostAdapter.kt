@@ -4,7 +4,7 @@ import android.view.LayoutInflater
 import android.view.ViewGroup
 import androidx.recyclerview.widget.RecyclerView
 import com.app.postapp.databinding.LayoutPostBinding
-import com.app.postapp.network.Post
+import com.app.postapp.domain.model.Post
 
 class PostAdapter(
     val posts: List<Post>,

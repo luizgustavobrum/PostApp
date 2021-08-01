@@ -4,7 +4,7 @@ import android.view.LayoutInflater
 import android.view.ViewGroup
 import androidx.recyclerview.widget.RecyclerView
 import com.app.postapp.databinding.LayoutUserBinding
-import com.app.postapp.network.User
+import com.app.postapp.domain.model.User
 
 class UserAdapter(
     val users: List<User>,
@@ -22,7 +22,9 @@ class UserAdapter(
         holder.bind(user = users[position])
     }
 
-    class UserViewHolder(binding: LayoutUserBinding, listener: (User) -> Unit) :
+    inner class UserViewHolder(
+        binding: LayoutUserBinding,
+        listener: (User) -> Unit) :
         RecyclerView.ViewHolder(binding.root) {
 
         private val name = binding.userName
