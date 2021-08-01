@@ -1,17 +1,18 @@
-package com.app.postapp.repository
+package com.app.postapp.data.repository
 
 import android.util.Log
-import com.app.postapp.components.Either
-import com.app.postapp.network.Post
-import com.app.postapp.network.ServicePlataform
-import com.app.postapp.network.User
+import com.app.postapp.domain.model.Either
+import com.app.postapp.data.model.PostResponse
+import com.app.postapp.data.api.ServicePlataform
+import com.app.postapp.data.model.UserResponse
+import com.app.postapp.domain.repository.RepositoryInterface
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.withContext
 import retrofit2.HttpException
 
 internal class DataRepository : RepositoryInterface {
 
-    override suspend fun getPosts(): Result<List<Post>> {
+    override suspend fun getPosts(): Result<List<PostResponse>> {
         return try {
             val response = ServicePlataform.serviceApp.posts()
             if (response.isSuccessful && response.body() != null) {
@@ -26,7 +27,7 @@ internal class DataRepository : RepositoryInterface {
         }
     }
 
-    override suspend fun getUsers(): Result<List<User>> {
+    override suspend fun getUsers(): Result<List<UserResponse>> {
         return try {
             val response = ServicePlataform.serviceApp.users()
             if (response.isSuccessful && response.body() != null) {
@@ -41,7 +42,7 @@ internal class DataRepository : RepositoryInterface {
         }
     }
 
-    override suspend fun getPostsEither(): Either<String, List<Post>> =
+    override suspend fun getPostsEither(): Either<String, List<PostResponse>> =
         withContext(Dispatchers.IO) {
             try {
                 val response = ServicePlataform.serviceApp.posts()
@@ -61,7 +62,7 @@ internal class DataRepository : RepositoryInterface {
             }
         }
 
-    override suspend fun getUsersEither(): Either<String, List<User>> =
+    override suspend fun getUsersEither(): Either<String, List<UserResponse>> =
         withContext(Dispatchers.IO) {
             try {
                 val response = ServicePlataform.serviceApp.users()

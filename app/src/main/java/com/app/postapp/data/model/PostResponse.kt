@@ -1,4 +1,4 @@
-package com.app.postapp.network
+package com.app.postapp.data.model
 
 import com.google.gson.annotations.SerializedName
 

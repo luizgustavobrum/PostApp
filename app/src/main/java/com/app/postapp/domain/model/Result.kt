@@ -1,4 +1,4 @@
-package com.app.postapp.components
+package com.app.postapp.domain.model
 
 /*
 * [Left] é para indicar erro.
