@@ -1,10 +1,10 @@
 package com.app.postapp.domain.repository
 
-import com.app.postapp.domain.model.Either
-import com.app.postapp.data.model.PostResponse
-import com.app.postapp.data.model.UserResponse
+import com.app.postapp.domain.model.Result
+import com.app.postapp.domain.model.Post
+import com.app.postapp.domain.model.User
 
-interface RepositoryInterface {
-    suspend fun getPostsEither(): Either<String, List<PostResponse>>
-    suspend fun getUsersEither(): Either<String, List<UserResponse>>
+interface DataRepository {
+    suspend fun getPosts(): Result<String, List<Post>>
+    suspend fun getUsers(): Result<String, List<User>>
 }

@@ -1,87 +1,81 @@
 package com.app.postapp.data.repository
 
 import android.util.Log
-import com.app.postapp.domain.model.Either
-import com.app.postapp.data.model.PostResponse
-import com.app.postapp.data.api.ServicePlataform
-import com.app.postapp.data.model.UserResponse
-import com.app.postapp.domain.repository.RepositoryInterface
+import com.app.postapp.data.api.ApiService
+import com.app.postapp.domain.model.Result
+import com.app.postapp.data.mapper.toPost
+import com.app.postapp.data.mapper.toUser
+import com.app.postapp.domain.model.Post
+import com.app.postapp.domain.model.User
+import com.app.postapp.domain.repository.DataRepository
+import kotlinx.coroutines.CoroutineDispatcher
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.withContext
 import retrofit2.HttpException
+import javax.inject.Inject
 
-internal class DataRepository : RepositoryInterface {
+class DataRepositoryImpl @Inject constructor(
+    private val service: ApiService
+) : DataRepository {
 
-    override suspend fun getPosts(): Result<List<PostResponse>> {
-        return try {
-            val response = ServicePlataform.serviceApp.posts()
+    private val ioDispatcher: CoroutineDispatcher = Dispatchers.IO
+
+    override suspend fun getPosts(): Result<String, List<Post>> = withContext(ioDispatcher) {
+        try {
+            val response = service.posts()
             if (response.isSuccessful && response.body() != null) {
-                Result.success(value = response.body()!!)
-            } else {
-                Result.failure(exception = Exception("HttpCode: ${response.code()} - body: ${response.body()}"))
-            }
+                response.body()?.let { postsResponse ->
+                    val posts = postsResponse.map {
+                        it.toPost()
+                    }
+                    Result.Success(posts)
+                } ?: kotlin.run {
+                    Result.Error(value = "Code: ${response.code()} - Response: ${response.body()}")
+                }
 
+            } else {
+                prettyLog(msg = "Code: ${response.code()} - Response: ${response.body()}")
+                Result.Error(value = "Code: ${response.code()} - Response: ${response.body()}")
+            }
+        } catch (e: HttpException) {
+            val error = "Code:${e.code()} - Response: ${e.response()} - Message: ${e.message()}"
+            prettyLog(e)
+            Result.Error(value = error)
         } catch (e: Exception) {
             prettyLog(e)
-            Result.failure(exception = e)
+            Result.Error("Erro: ${e.printStackTrace()}")
         }
+
     }
 
-    override suspend fun getUsers(): Result<List<UserResponse>> {
-        return try {
-            val response = ServicePlataform.serviceApp.users()
+
+    override suspend fun getUsers(): Result<String, List<User>> = withContext(ioDispatcher) {
+        try {
+            val response = service.users()
+            prettyLog(msg = "USERS SUCCESS")
             if (response.isSuccessful && response.body() != null) {
-                Result.success(response.body()!!)
-            } else {
-                Result.failure(exception = Exception("HttpCode: ${response.code()} - body: ${response.body()}"))
-            }
-
-        } catch (e: Exception) {
-            prettyLog(e)
-            Result.failure(exception = e)
-        }
-    }
-
-    override suspend fun getPostsEither(): Either<String, List<PostResponse>> =
-        withContext(Dispatchers.IO) {
-            try {
-                val response = ServicePlataform.serviceApp.posts()
-                if (response.isSuccessful && response.body() != null) {
-                    Either.Right(response.body().orEmpty())
-                } else {
+                response.body()?.let { usersResponse ->
+                    val users = usersResponse.map {
+                        it.toUser()
+                    }
+                    Result.Success(users)
+                } ?: kotlin.run {
                     prettyLog(msg = "Code: ${response.code()} - Response: ${response.body()}")
-                    Either.Left(value = "Code: ${response.code()} - Response: ${response.body()}")
+                    Result.Error(value = "Code: ${response.code()} - Response: ${response.body()}")
                 }
-            } catch (e: HttpException) {
-                val error = "Code:${e.code()} - Response: ${e.response()} - Message: ${e.message()}"
-                prettyLog(e)
-                Either.Left(value = error)
-            } catch (e: Exception) {
-                prettyLog(e)
-                Either.Left("Erro: ${e.printStackTrace()}")
+            } else {
+                prettyLog(msg = "Code:${response.code()} - Response: ${response.body()}")
+                Result.Error(value = "Code:${response.code()} - Response: ${response.body()}")
             }
+        } catch (e: HttpException) {
+            val error = "Code:${e.code()} - Response: ${e.response()} - Message: ${e.message()}"
+            prettyLog(e)
+            Result.Error(value = error)
+        } catch (e: Exception) {
+            prettyLog(e)
+            Result.Error("Erro: ${e.printStackTrace()}")
         }
-
-    override suspend fun getUsersEither(): Either<String, List<UserResponse>> =
-        withContext(Dispatchers.IO) {
-            try {
-                val response = ServicePlataform.serviceApp.users()
-                prettyLog(msg = "USERS SUCCESS")
-                if (response.isSuccessful && response.body() != null) {
-                    Either.Right(response.body().orEmpty())
-                } else {
-                    prettyLog(msg = "Code:${response.code()} - Response: ${response.body()}")
-                    Either.Left(value = "Code:${response.code()} - Response: ${response.body()}")
-                }
-            } catch (e: HttpException) {
-                val error = "Code:${e.code()} - Response: ${e.response()} - Message: ${e.message()}"
-                prettyLog(e)
-                Either.Left(value = error)
-            } catch (e: Exception) {
-                prettyLog(e)
-                Either.Left("Erro: ${e.printStackTrace()}")
-            }
-        }
+    }
 
     private fun prettyLog(e: Exception) {
         Log.e(TAG, e.toString())
@@ -92,6 +86,6 @@ internal class DataRepository : RepositoryInterface {
     }
 
     companion object {
-        private val TAG = DataRepository::class.java.simpleName
+        private val TAG = DataRepositoryImpl::class.java.simpleName
     }
 }

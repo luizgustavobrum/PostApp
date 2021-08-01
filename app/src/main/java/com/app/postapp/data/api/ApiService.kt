@@ -5,7 +5,7 @@ import com.app.postapp.data.model.UserResponse
 import retrofit2.Response
 import retrofit2.http.GET
 
-interface ServiceApp {
+interface ApiService {
     @GET(value = "/posts")
     suspend fun posts(): Response<List<PostResponse>>
 

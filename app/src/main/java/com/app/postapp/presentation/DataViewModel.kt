@@ -1,85 +1,63 @@
 package com.app.postapp.presentation
 
-import androidx.lifecycle.LiveData
-import androidx.lifecycle.MutableLiveData
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
-import com.app.postapp.components.Either
-import com.app.postapp.network.Post
-import com.app.postapp.network.User
-import com.app.postapp.repository.RepositoryInterface
-import kotlinx.coroutines.Dispatchers
+import com.app.postapp.domain.model.Post
+import com.app.postapp.domain.model.Result
+import com.app.postapp.domain.model.User
+import com.app.postapp.domain.usecase.PostUseCase
+import com.app.postapp.domain.usecase.UserUseCase
+import dagger.hilt.android.lifecycle.HiltViewModel
+import kotlinx.coroutines.flow.MutableStateFlow
+import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.launch
-import kotlinx.coroutines.withContext
+import javax.inject.Inject
 
-class DataViewModel(
-    private val repository: RepositoryInterface
+@HiltViewModel
+class DataViewModel @Inject constructor(
+    private val postUseCase: PostUseCase,
+    private val userUseCase: UserUseCase
 ) : ViewModel() {
 
-    private val _postsLiveData = MutableLiveData<List<Post>>()
-    val postsLiveData: LiveData<List<Post>> = _postsLiveData
+    private val _uiPostsState: MutableStateFlow<UiState<String, List<Post>>> =
+        MutableStateFlow(UiState.Loading)
+    val uiPostsState: StateFlow<UiState<String, List<Post>>> get() = _uiPostsState
 
-    private val _usersLiveData = MutableLiveData<List<User>>()
-    val usersLiveData: LiveData<List<User>> = _usersLiveData
-
+    private val _uiUsersState: MutableStateFlow<UiState<String, List<User>>> =
+        MutableStateFlow(UiState.Loading)
+    val uiUsersState: StateFlow<UiState<String, List<User>>> get() = _uiUsersState
 
     init {
-        viewModelScope.launch {
-            val posts = repository.getPostsEither()
-            if (posts is Either.Right) {
-                posts.value.let { _postsLiveData.postValue(it) }
+        getPosts()
+        getUsers()
+    }
+
+    fun getPosts() = viewModelScope.launch {
+        _uiPostsState.value = UiState.Loading
+        val posts = postUseCase.getPosts()
+        when (posts) {
+            is Result.Success -> {
+                _uiPostsState.value = UiState.Success(posts.value)
             }
-
-            val users = repository.getUsersEither()
-            if (users is Either.Right) {
-                _usersLiveData.postValue(users.value!!)
+            is Result.Error -> {
+                _uiPostsState.value = UiState.Error(posts.value)
             }
         }
-    }
 
-    fun getUsers() {
-        viewModelScope.launch {
-            val users = withContext(Dispatchers.IO) { repository.getUsers() }
-            users.fold(
-                onSuccess = {
-                    _usersLiveData.postValue(it)
-                },
-                onFailure = {
-
-                })
-        }
-    }
-
-    fun getPosts() {
-        viewModelScope.launch {
-            val posts = withContext(Dispatchers.IO) { repository.getPosts() }
-            posts.fold(
-                onSuccess = {
-                    _postsLiveData.postValue(it)
-                },
-                onFailure = {
-
-                })
-        }
     }
 
 
-    fun getPostsWithEither() {
-        viewModelScope.launch {
-            val posts = repository.getPostsEither()
-            if (posts is Either.Right) {
-                posts.value.let { _postsLiveData.postValue(it) }
+    fun getUsers() = viewModelScope.launch {
+        _uiUsersState.value = UiState.Loading
+        val users = userUseCase.getUsers()
+        when (users) {
+            is Result.Success -> {
+                _uiUsersState.value = UiState.Success(users.value)
+            }
+            is Result.Error -> {
+                _uiUsersState.value = UiState.Error(users.value)
             }
         }
     }
 
-
-    fun getUsersWithEiter() {
-        viewModelScope.launch {
-            val users = repository.getUsersEither()
-            if (users is Either.Right) {
-                _usersLiveData.postValue(users.value!!)
-            }
-        }
-    }
 }
