@@ -23,6 +23,7 @@ class DataRepositoryImpl @Inject constructor(
     override suspend fun getPosts(): Result<String, List<Post>> = withContext(ioDispatcher) {
         try {
             val response = service.posts()
+            prettyLog(msg = "REQUEST HAPPENED")
             if (response.isSuccessful && response.body() != null) {
                 response.body()?.let { postsResponse ->
                     val posts = postsResponse.map {
@@ -52,7 +53,7 @@ class DataRepositoryImpl @Inject constructor(
     override suspend fun getUsers(): Result<String, List<User>> = withContext(ioDispatcher) {
         try {
             val response = service.users()
-            prettyLog(msg = "USERS SUCCESS")
+            prettyLog(msg = "REQUEST HAPPENED")
             if (response.isSuccessful && response.body() != null) {
                 response.body()?.let { usersResponse ->
                     val users = usersResponse.map {
