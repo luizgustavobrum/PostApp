@@ -15,18 +15,22 @@ import javax.inject.Singleton
 @InstallIn(SingletonComponent::class)
 object NetworkModule {
 
-    const val BASE_URL = "https://jsonplaceholder.typicode.com"
-    val okHttpClient = OkHttpClient.Builder()
-        .connectTimeout(1, TimeUnit.MINUTES)
-        .readTimeout(30, TimeUnit.SECONDS)
-        .writeTimeout(15, TimeUnit.SECONDS)
-        .build()
+    private const val BASE_URL = "https://jsonplaceholder.typicode.com"
 
 
     @Singleton
     @Provides
-    fun provideApiService(
+    fun provideOkHttpClient(): OkHttpClient =
+        OkHttpClient.Builder()
+            .connectTimeout(1, TimeUnit.MINUTES)
+            .readTimeout(30, TimeUnit.SECONDS)
+            .writeTimeout(15, TimeUnit.SECONDS)
+            .build()
 
+    @Singleton
+    @Provides
+    fun provideApiService(
+        okHttpClient: OkHttpClient
     ): ApiService {
         return Retrofit.Builder()
             .baseUrl(BASE_URL)
